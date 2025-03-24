@@ -14,6 +14,8 @@ def gauss_solve(equation: np.array, A: np.array):
             if abs(equation[j,i]) > abs(equation[a_max, i]):
                 a_max = j
         equation[i], equation[a_max] = equation[a_max], equation[i]
+        if abs(equation[i,i]) < 1:
+            equation[i] = equation[i] * 10
         equation[i] = equation[i] / equation[i,i]
         for j in range(N):
             if j == i:
