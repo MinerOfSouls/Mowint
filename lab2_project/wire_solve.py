@@ -1,12 +1,6 @@
 import numpy as np
 import networkx as nx
-from wire_vis import draw_current
-
-def parse_file(filename: str) -> nx.Graph:
-    file = open(filename)
-    graph = nx.read_edgelist(file, nodetype=int, data=(('resistance', float),))
-    file.close()
-    return graph
+from lab2_project.wire_util import draw_current, parse_file
 
 def create_nodal_analisis_matrix(graph: nx.Graph, source: int, tap: int) -> np.ndarray:
     N = graph.number_of_nodes()

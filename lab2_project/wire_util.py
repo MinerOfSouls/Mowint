@@ -25,3 +25,9 @@ def draw_current(graph: nx.Graph):
     ax.set_axis_off()
     plt.colorbar(pc, ax=ax)
     plt.show()
+
+def parse_file(filename: str) -> nx.Graph:
+    file = open(filename)
+    graph = nx.read_edgelist(file, nodetype=int, data=(('resistance', float),))
+    file.close()
+    return graph
