@@ -36,10 +36,56 @@ def solve_nodal_analisis(graph: nx.Graph, source: int, tap: int, voltage: int):
     #Returns the voltages in each node and the current through the voltage source
     return [solution[i] - solution[0] for i in range(N)], -solution[-1]
 
-def example():
-    graph = parse_file("test.txt")
-    sol, i = solve_nodal_analisis(graph, 1, 0, 10)
-    descp = {"source":1, "tap":0, "voltage":10, "current":i}
-    p = create_graf_from_solution(graph, sol)
-    validate_solution(p.copy(), descp, True)
-    draw_current(p, descp)
+def vertex_to_edge_cycle(cycle):
+    new = []
+    for v in range(len(cycle)-1):
+        new.append((cycle[v], cycle[v+1]))
+    new.append((cycle[-1], cycle[0]))
+    return new
+
+# failed apptempt to write a slver that uses kirchoffs
+def solve_kirhoffs(graph: nx.Graph, source: int, tap: int, voltage: int):
+    new = nx.DiGraph()
+    i = 0
+    g_dict = {}
+    for u, v, d in graph.edges(data=True):
+        u, v = min(u, v), max(u, v)
+        new.add_edge(u, v, resistance = d['resistance'])
+        g_dict[(u, v)] = i
+        i += 1  
+    new.add_edge(min(tap, source), max(tap, source))
+    graph.add_edge(tap, source)
+
+
+    matrix = np.zeros((new.number_of_edges(), new.number_of_edges()))
+    right = np.zeros(new.number_of_edges())
+    
+    
+    for i in range(new.number_of_nodes()-1):
+        for u, v in new.edges(i):
+            u, v = min(u, v), max(u, v)
+            id = g_dict[(u, v)]
+            if i == u:
+                matrix[i, id] = 1
+            else:
+                matrix[i, id] = -1
+    
+    cycles = [c for c in nx.simple_cycles]
+
+    start = new.number_of_nodes()-1
+
+    for i in range(new.number_of_nodes()-1, new.number_of_edges()):
+        egde_cycle = vertex_to_edge_cycle(cycles[i-start])
+        if (source, tap) in egde_cycle:
+            egde_cycle.remove((source, tap))
+            right[i] = -voltage
+        elif (tap, source) in egde_cycle:
+            egde_cycle.remove((tap, source))
+            right[i] = -voltage
+        for egde in egde_cycle:
+            id = g_dict[egde]
+            matrix[i, id] = new.get_edge_data(egde[0], egde[1])['resistance']
+
+    currents = np.linalg.solve(matrix, right)
+    print(currents)
+    return 0

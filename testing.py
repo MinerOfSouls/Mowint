@@ -1,2 +1,2 @@
-from wire_solve import example
+from wire_solve import example, kirhoff_example
 example()
