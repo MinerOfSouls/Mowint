@@ -20,7 +20,7 @@ def display_image(image):
     plt.matshow(image, cmap="Greys")
     plt.show()
 
-def animation_form_images(image_list, save = True, i=10):
+def animation_form_images(image_list, save = True, i=50):
     print("Prosessing...")
     fig, ax = plt.subplots()
     ims = []
@@ -98,29 +98,194 @@ def ising_model(image: np.ndarray, nb_func, J):
                 value += image[i, j]*image[x, y]*J
     return value
 
+def same_cololors_attract_point_change(image, curr, one, two, nb_func):
+    prev_value = 0
+    neighbours_one = nb_func(image, one)
+
+    for x, y in neighbours_one:
+        nb2 = nb_func(image, (x, y))
+
+        for x2, y2 in nb2:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+
+        if image[one[0], one[1]] == image[x, y]:
+            prev_value += 1
+
+    neighbours_two = nb_func(image, two)
+
+    for x, y in neighbours_two:
+        nb2 = nb_func(image, (x, y))
+
+        for x2, y2 in nb2:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+
+        if image[two[0], two[1]] == image[x, y]:
+            prev_value += 1
+
+    image[one[0], one[1]], image[two[0], two[1]] = image[two[0], two[1]], image[one[0], one[1]]
+    new_value = 0
+    for x, y in neighbours_two:
+        nb2 = nb_func(image, (x, y))
+
+        for x2, y2 in nb2:
+            if image[x, y] == image[x2, y2]:
+                new_value += 1
+
+        if image[two[0], two[1]] == image[x, y]:
+            new_value += 1
+
+    for x, y in neighbours_one:
+        nb2 = nb_func(image, (x, y))
+        
+        for x2, y2 in nb2:
+            if image[x, y] == image[x2, y2]:
+                new_value += 1
+
+        if image[one[0], one[1]] == image[x, y]:
+            new_value += 1
+    return curr  - new_value + prev_value
+    
+def atract_repperl_point_change(image, curr, one, two):
+    prev_value = 0
+    a, b = nb8_16(image, one)
+    for x, y in a:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                prev_value += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+        if image[one[0], one[1]] != image[x, y]:
+            prev_value += 1
+    for x, y in b:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                prev_value += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+        if image[one[0], one[1]] == image[x, y]:
+            prev_value += 1
+    a, b = nb8_16(image, two)
+    for x, y in a:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                prev_value += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+        if image[two[0], two[1]] != image[x, y]:
+            prev_value += 1
+    for x, y in b:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                prev_value += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                prev_value += 1
+        if image[two[0], two[1]] == image[x, y]:
+            prev_value += 1
+
+    image[one[0], one[1]], image[two[0], two[1]] = image[two[0], two[1]], image[one[0], one[1]]
+    new_v = 0
+    
+    a, b = nb8_16(image, one)
+    for x, y in a:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                new_v += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                new_v += 1
+        if image[one[0], one[1]] != image[x, y]:
+                new_v += 1
+    for x, y in b:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                new_v += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                new_v += 1
+        if image[one[0], one[1]] == image[x, y]:
+            new_v += 1
+
+    a, b = nb8_16(image, two)
+    for x, y in a:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                new_v += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                new_v += 1
+        if image[two[0], two[1]] != image[x, y]:
+            new_v += 1
+    for x, y in b:
+        a, b = nb8_16(image, (x, y))
+        for x2, y2 in a:
+            if image[x, y] != image[x2, y2]:
+                new_v += 1
+        for x2, y2 in b:
+            if image[x, y] == image[x2, y2]:
+                new_v += 1
+        if image[two[0], two[1]] == image[x, y]:
+            new_v += 1
+    
+    return curr - new_v + prev_value
+
+def ising_model_point_change(image, curr, one, two, nb_func, J):
+    prev = 0
+    nb = nb_func(image, one)
+    for x, y in nb:
+        nb2 = nb_func(image, (x, y))
+        for x2, y2 in nb2:
+            if image[x, y] != image[x2, y2]:
+                prev += image[x, y]*image[x2, y2]*J
+        
+        prev += image[one[0], one[1]]*image[x, y]*J
+    nb = nb_func(image, two)
+    for x, y in nb:
+        nb2 = nb_func(image, (x, y))
+        for x2, y2 in nb2:
+            if image[x, y] != image[x2, y2]:
+                prev += image[x, y]*image[x2, y2]*J
+        prev += image[two[0], two[1]]*image[x, y]*J
+    
+    image[one[0], one[1]], image[two[0], two[1]] = image[two[0], two[1]], image[one[0], one[1]]
+
+    newer = 0
+    nb = nb_func(image, one)
+    for x, y in nb:
+        nb2 = nb_func(image, (x, y))
+        for x2, y2 in nb2:
+            if image[x, y] != image[x2, y2]:
+                newer += image[x, y]*image[x2, y2]*J
+        
+        newer += image[one[0], one[1]]*image[x, y]*J
+    nb = nb_func(image, two)
+    for x, y in nb:
+        nb2 = nb_func(image, (x, y))
+        for x2, y2 in nb2:
+            if image[x, y] != image[x2, y2]:
+                newer += image[x, y]*image[x2, y2]*J
+        newer += image[two[0], two[1]]*image[x, y]*J
+
+    return curr - newer + prev
+
 def acceptance(curr, next, temp):
     if next < curr:
         return True
     else:
         r = np.random.random()
         return r <= np.exp(-(next - curr)/temp)
-    
-def semi_random_neighbour(image: np.ndarray, temp_precent):
-    n = image.shape[0]
-    swaps = np.random.randint(0, n, (max(int((n//2)* n * temp_precent), 1), 2))
-    for s in swaps:
-        image[s[0], s[1]] = image[s[0], s[1]] * -1
-    return swaps
-
-def swap_two_points(image: np.ndarray):
-    n = image.shape[0]
-    one = np.random.randint(0, n, 2)
-    two = np.random.randint(0, n, 2)
-    while image[one[0], one[1]] == image[two[0], two[1]]:
-        one = np.random.randint(0, n, 2)
-    image[one[0], one[1]], image[two[0], two[1]] = image[two[0], two[1]], image[one[0], one[1]]
-    return one, two
-
 
 def get_energy_function(energy_mode = 1, nb_mode = 1, modifier = 1):
     if energy_mode == 1:
@@ -136,41 +301,64 @@ def get_energy_function(energy_mode = 1, nb_mode = 1, modifier = 1):
         elif nb_mode == 2:
             return functools.partial(ising_model, nb_func = nb8, J = modifier)
         
+
+def point_cange_function(energy_mode, nb_mode, modifier):
+    if energy_mode == 1:
+        if nb_mode == 1:
+            return functools.partial(same_cololors_attract_point_change, nb_func = nb4)
+        elif nb_mode == 2:
+            return functools.partial(same_cololors_attract_point_change, nb_func = nb8)
+    elif energy_mode == 2:
+        return atract_repperl_point_change
+    elif energy_mode == 3:
+        if nb_mode == 1:
+            return functools.partial(ising_model_point_change, nb_func = nb4, J = modifier)
+        elif nb_mode == 2:
+            return functools.partial(ising_model_point_change, nb_func = nb8, J = modifier)
+
 def temperature(i, max_iter, L):
     x = 25*(i/max_iter) - 20
     return L/(1 + 1.2*np.exp(-x))
 
 def image_anneal(n, black_conctrention, max_temp, max_iter, energy_mode, nb_mode, J = 1):
     energy = get_energy_function(energy_mode, nb_mode, J)
+    swap = point_cange_function(energy_mode, nb_mode, J)
     current = image_generator(n, black_conctrention)
     values = []
     images = []
 
     minimum = current
     min_energy = energy(current)
+    e = min_energy
 
     for i in tqdm.tqdm(range(max_iter, 0,  -1)):
         t = temperature(i, max_iter, max_temp)
-        e = energy(current)
         values.append(e)
-        images.append(current.copy())
-
+        if i % 200 == 0:
+            images.append(current.copy())
         if e < min_energy:
             min_energy = e
             minimum = current
 
-        o, tw = swap_two_points(current)
-        e_prim = energy(current)
+        one = np.random.randint(0, n, 2)
+        two = np.random.randint(0, n, 2)
+        while current[one[0], one[1]] == current[two[0], two[1]]:
+            one = np.random.randint(0, n, 2)
+
+        e_prim = swap(current, e, one, two)
+
         if not acceptance(e, e_prim, t):
-            current[o[0], o[1]], current[tw[0], tw[1]] = current[tw[0], tw[1]], current[o[0], o[1]]
+            current[one[0], one[1]], current[two[0], two[1]] = current[two[0], two[1]], current[one[0], one[1]]
+        else:
+            e = e_prim
     return minimum, min_energy, values, images
 
 def example():
-    img, min_e, values, images = image_anneal(50, 0.4, 5230, 5000, 1, 2)
+    img, min_e, values, images = image_anneal(50, 0.4, 5230, 100000, 1, 2)
 
     print(min_e)
 
     plt.plot(values)
     plt.show()
     display_image(img)
-    animation_form_images(images, False)
+    #animation_form_images(images, False)
