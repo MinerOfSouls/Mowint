@@ -6,4 +6,5 @@ __pycache__/
 lab6/maildir/
 lab6/big.npz
 lab6/files.json
-.gitignore
+lab6/terms.json
+lab6/big_normalised.npz
