@@ -3,3 +3,7 @@
 lab2_project/__pycache__
 __pycache__/
 /.idea
+lab6/maildir/
+lab6/big.npz
+lab6/files.json
+.gitignore
