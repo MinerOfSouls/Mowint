@@ -7,6 +7,7 @@ import time
 import scipy as sci
 import numpy as np
 from tqdm import tqdm
+import scipy.sparse as sparse
 
 extra_exclusions = {"To", "From", "Subject", "enron", "com"}
 
@@ -122,12 +123,23 @@ def normalise_matrix(matrix):
     matrix = matrix / norms
     sci.sparse.save_npz("lab6/big_normalised", matrix)
 
+def make_pre_svd(matrix):
+    pre_svd_matrix = sci.sparse.csr_array(sci.sparse.load_npz(matrix), dtype=np.float32)
+    SVD = sci.sparse.linalg.svds(pre_svd_matrix, 1000)
+    U = sparse.csr_array(SVD[0])
+    VT = sparse.csr_array(SVD[2])
+    S = sparse.diags(SVD[1]).tocsr()
+    m = U @ S @ VT
+    sparse.save_npz("svd",m)
+
 def preproces_data(directory):
     create_bag_of_words(directory)
     create_pre_compute_file_vectors("terms.json", "file_vectors.json")
     compute_matrix("terms.json", "vectors_computed.json")
     normalise_matrix("big.npz")
+    make_pre_svd("big.npz")
 
-normalise_matrix("lab6/big.npz")
-matrix = sci.sparse.load_npz("lab6/big.npz")
-print(matrix.dtype, matrix)
+"""if __name__ == "__main__":
+    preproces_data("maildir")"""
+
+make_pre_svd("big.npz")
